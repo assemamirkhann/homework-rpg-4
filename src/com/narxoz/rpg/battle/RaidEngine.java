@@ -25,9 +25,45 @@ public class RaidEngine {
         // Use random for critical strikes or other deterministic events.
         // Example: boolean critA = random.nextInt(100) < 10;
         RaidResult result = new RaidResult();
-        result.setRounds(0);
-        result.setWinner("TBD");
-        result.addLine("TODO: implement raid simulation");
+        if (teamA == null || teamB == null || teamASkill == null || teamBSkill == null) {
+            result.setWinner("Invalid input");
+            result.addLine("Raid cannot start: null parameter");
+            return result;
+        }
+        if (!teamA.isAlive() || !teamB.isAlive()) {
+            result.setWinner("Invalid state");
+            result.addLine("Raid cannot start: one of the teams is already defeated");
+            return result;
+        }
+        int rounds = 0;
+        int maxRounds = 30;
+        result.addLine("Raid started between " + teamA.getName() + " and " + teamB.getName());
+        while (teamA.isAlive() && teamB.isAlive() && rounds < maxRounds) {
+            rounds++;
+            result.addLine("Round " + rounds);
+            result.addLine(teamA.getName() + " casts skill on " + teamB.getName());
+            teamASkill.cast(teamB);
+            if (!teamB.isAlive()) {
+                result.addLine(teamB.getName() + " has been defeated");
+                break;
+            }
+
+            result.addLine(teamB.getName() + " casts skill on " + teamA.getName());
+            teamBSkill.cast(teamA);
+            if (!teamA.isAlive()) {
+                result.addLine(teamA.getName() + " has been defeated");
+                break;
+            }
+        }
+        result.setRounds(rounds);
+        if (teamA.isAlive() && !teamB.isAlive()) {
+            result.setWinner(teamA.getName());
+        } else if (teamB.isAlive() && !teamA.isAlive()) {
+            result.setWinner(teamB.getName());
+        } else {
+            result.setWinner("Draw");
+        }
+        result.addLine("Raid finished in " + rounds + " rounds");
         return result;
     }
 }
